@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>Mes quiz</title></head>
+<body>
+  <h1>Quiz disponibles</h1>
+  <ul id="liste">Chargement...</ul>
+<script>
+const USER = 'vanessalt27', REPO = 'quiz';
+fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/`)
+  .then(r => r.json())
+  .then(files => {
+    const ul = document.getElementById('liste');
+    ul.innerHTML = '';
+    files.filter(f => f.name.endsWith('.html') && f.name !== 'index.html')
+      .forEach(f => {
+        const nom = f.name.replace('.html', '').replace(/[-_]/g, ' ');
+        ul.innerHTML += `<li><a href="${f.name}">${nom}</a></li>`;
+      });
+  });
+</script>
+</body>
+</html>
