@@ -1,22 +1,291 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Mes quiz</title></head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mes quiz</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --surface: #ffffff;
+    --text: #1c2233;
+    --muted: #667085;
+    --border: #e4e7ef;
+    --accent: #4f46e5;
+    --shadow: 0 1px 2px rgba(16,24,40,.05), 0 4px 12px rgba(16,24,40,.06);
+    --shadow-hover: 0 8px 24px rgba(16,24,40,.12);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1220;
+      --surface: #181c2e;
+      --text: #e8eaf2;
+      --muted: #9aa3b8;
+      --border: #262b42;
+      --accent: #818cf8;
+      --shadow: 0 1px 2px rgba(0,0,0,.3);
+      --shadow-hover: 0 8px 24px rgba(0,0,0,.45);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* En-tête */
+  header {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed 55%, #db2777);
+    color: #fff;
+    padding: 56px 20px 88px;
+    text-align: center;
+  }
+  header h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -.02em; }
+  header p { margin-top: 8px; opacity: .9; font-size: 1.05rem; }
+
+  main { max-width: 1100px; margin: -52px auto 0; padding: 0 20px 60px; }
+
+  /* Barre de recherche */
+  .toolbar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .toolbar svg { flex-shrink: 0; color: var(--muted); }
+  .toolbar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    color: var(--text);
+    padding: 6px 0;
+  }
+  .count {
+    font-size: .85rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* Grille de tuiles */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    animation: apparition .35s ease both;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 5px;
+    background: var(--c1);
+  }
+  .card:hover, .card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--c1);
+    outline: none;
+  }
+  .icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    margin-bottom: 16px;
+  }
+  .card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+  .card p { color: var(--muted); font-size: .92rem; flex: 1; }
+  .go {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: .92rem;
+    color: var(--c1);
+  }
+  .go span { transition: transform .2s ease; }
+  .card:hover .go span { transform: translateX(4px); }
+
+  /* Chargement */
+  .skeleton {
+    height: 190px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+  }
+  .message {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--muted);
+    padding: 48px 20px;
+  }
+
+  footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 0 20px 32px; }
+
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  @keyframes apparition { from { opacity: 0; transform: translateY(10px); } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  @media (max-width: 480px) {
+    header { padding: 40px 16px 76px; }
+    main { padding: 0 14px 40px; }
+    .grid { gap: 14px; }
+  }
+</style>
+</head>
 <body>
+
+<header>
   <h1>Quiz disponibles</h1>
-  <ul id="liste">Chargement...</ul>
+  <p>Choisis un quiz pour commencer</p>
+</header>
+
+<main>
+  <div class="toolbar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="recherche" type="search" placeholder="Rechercher un quiz..." aria-label="Rechercher un quiz">
+    <span class="count" id="compteur"></span>
+  </div>
+
+  <div class="grid" id="grille">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</main>
+
+<footer>Bonne chance !</footer>
+
 <script>
-const USER = 'vanessalt27', REPO = 'quiz';
-fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/`)
-  .then(r => r.json())
-  .then(files => {
-    const ul = document.getElementById('liste');
-    ul.innerHTML = '';
-    files.filter(f => f.name.endsWith('.html') && f.name !== 'index.html')
-      .forEach(f => {
-        const nom = f.name.replace('.html', '').replace(/[-_]/g, ' ');
-        ul.innerHTML += `<li><a href="${f.name}">${nom}</a></li>`;
-      });
+  // ===== Configuration =====
+  const USER = 'vanessalt27';
+  const REPO = 'quiz';
+  // Liste de secours si l'API GitHub ne répond pas (limite de requêtes atteinte, par exemple)
+  const QUIZ_SECOURS = [
+    // 'gestion-stress.html',
+  ];
+  // =========================
+
+  const PALETTE = [
+    ['#4f46e5', '#7c3aed'], ['#0891b2', '#06b6d4'], ['#db2777', '#f472b6'],
+    ['#059669', '#34d399'], ['#ea580c', '#fb923c'], ['#7c3aed', '#c084fc'],
+    ['#2563eb', '#60a5fa'], ['#dc2626', '#f87171']
+  ];
+
+  const grille = document.getElementById('grille');
+  const recherche = document.getElementById('recherche');
+  const compteur = document.getElementById('compteur');
+  let quiz = [];
+
+  function hash(str) {
+    let h = 0;
+    for (const c of str) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    return h;
+  }
+
+  function joliNom(fichier) {
+    const n = fichier.replace(/\.html$/i, '').replace(/^quiz[-_]?/i, '').replace(/[-_]+/g, ' ');
+    return n.charAt(0).toUpperCase() + n.slice(1);
+  }
+
+  function echapper(s) {
+    return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // Lit le <title> et la <meta name="description"> de chaque quiz pour l'affichage
+  async function lireInfos(fichier) {
+    const infos = { fichier, titre: joliNom(fichier), description: '' };
+    try {
+      const html = await (await fetch(fichier)).text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const t = doc.querySelector('title')?.textContent.trim();
+      const d = doc.querySelector('meta[name="description"]')?.content.trim();
+      if (t) infos.titre = t;
+      if (d) infos.description = d;
+    } catch (e) { /* on garde le nom du fichier */ }
+    return infos;
+  }
+
+  function afficher(liste) {
+    compteur.textContent = `${liste.length} quiz`;
+    if (!liste.length) {
+      grille.innerHTML = '<p class="message">Aucun quiz trouvé.</p>';
+      return;
+    }
+    grille.innerHTML = liste.map((q, i) => {
+      const [c1, c2] = PALETTE[hash(q.fichier) % PALETTE.length];
+      const titre = echapper(q.titre);
+      const desc = echapper(q.description || 'Teste tes connaissances et obtiens ton certificat.');
+      return `
+        <a class="card" href="${encodeURI(q.fichier)}" style="--c1:${c1};--c2:${c2};animation-delay:${i * 50}ms">
+          <div class="icon">${titre.charAt(0).toUpperCase()}</div>
+          <h2>${titre}</h2>
+          <p>${desc}</p>
+          <div class="go">Commencer <span>→</span></div>
+        </a>`;
+    }).join('');
+  }
+
+  async function listerFichiers() {
+    try {
+      const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/`);
+      if (!r.ok) throw new Error(r.status);
+      const files = await r.json();
+      return files
+        .filter(f => f.type === 'file' && /\.html$/i.test(f.name) && f.name !== 'index.html' && f.name !== '404.html')
+        .map(f => f.name);
+    } catch (e) {
+      return QUIZ_SECOURS;
+    }
+  }
+
+  async function init() {
+    const fichiers = await listerFichiers();
+    if (!fichiers.length) {
+      grille.innerHTML = '<p class="message">Impossible de charger la liste des quiz pour le moment. Réessaie dans quelques minutes.</p>';
+      compteur.textContent = '';
+      return;
+    }
+    quiz = (await Promise.all(fichiers.map(lireInfos)))
+      .sort((a, b) => a.titre.localeCompare(b.titre, 'fr'));
+    afficher(quiz);
+  }
+
+  recherche.addEventListener('input', () => {
+    const q = recherche.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    afficher(quiz.filter(x => norm(x.titre + ' ' + x.description).includes(q)));
   });
+
+  init();
 </script>
 </body>
 </html>
